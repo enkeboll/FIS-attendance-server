@@ -10,6 +10,12 @@ class IDCard(db.Model):
 
     students = db.relationship('Student', backref='id_card', lazy='dynamic')
 
+    def punch_in(self):
+
+    def __repr__(self):
+        return '<IDCard {self.serial_no}>'
+
+
 
 class Student(db.Model):
     __tablename__ = 'student'
@@ -17,19 +23,23 @@ class Student(db.Model):
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(64))
-    idcard_id = db.Column(db.Integer, db.ForeignKey('idcard.id'))
+    idcard_id = db.Column(db.Integer, db.ForeignKey('id_card.id'))
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
+
+    def __repr__(self):
+        return f'<Student {self.first_name} {self.last_name}'
 
 
 class PunchIn(db.Model):
     __tablename__ = 'punch_in'
     id = db.Column(db.Integer, primary_key=True)
-    idcard_id = db.Column(db.Integer, db.ForeignKey('idcard.id'))
+    idcard_id = db.Column(db.Integer, db.ForeignKey('id_card.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now(), index=True)
-    updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
+    def __repr__(self):
+        return f'<PunchIn {self.idcard_id} @ {self.created_at.isoformat()}>'
 
 class Cohort(db.Model):
     __tablename__ = 'cohort'
@@ -37,3 +47,6 @@ class Cohort(db.Model):
     name = db.Column(db.String(64))
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
+
+    def __repr__(self):
+        return f'<Cohort {self.name}>'
