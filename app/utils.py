@@ -42,3 +42,17 @@ class CustomSelectField(Field):
             self.raw_data = [valuelist[1]]
         else:
             self.data = ''
+
+
+def get_or_create(session, model, **kwargs):
+    """
+    from https://stackoverflow.com/a/6078058
+    """
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        instance = model(**kwargs)
+        session.add(instance)
+        session.commit()
+        return instance

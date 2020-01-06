@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request
 
+from app import db
 from app.models import EditableHTML, IDCard, Student, PunchIn
+from ..utils import get_or_create
+
 
 main = Blueprint('main', __name__)
 
@@ -18,9 +21,17 @@ def about():
 
 @main.route('/punch-in', methods=['GET'])
 def punch_in():
-	if 'id' in request.args:
-		id = int(request.args['id'])
-	else:
-		return "Error: No id field provided. Please specify an id."
+    if 'id' in request.args:
+        serial_no = request.args['id']
+        id_card = get_or_create(db.session, IDCard, serial_no=serial_no)
+        print(id_card)
+        punch_in = PunchIn(idcard_id=id_card.id)
+        print(punch_in)
+        db.session.add(punch_in)
+        db.session.commit()
+        return f"Punch in recorded for card {serial_no}"
 
-	return f"Punch in recorded for card {id}"
+    else:
+        return "Error: No id field provided. Please specify an id."
+
+    
