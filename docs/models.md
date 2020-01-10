@@ -244,7 +244,7 @@ token is expired.
 
 
 We define a custom AnonymousUser class that represents a non-logged
-user. It extends the AnonymousUserMixing provided by flask-loginmanager
+user. It extends the AnonymousUserMixin provided by flask-loginmanager
 we deny all permissions and affirm that this user is not an admin
 
 ```

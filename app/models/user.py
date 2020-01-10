@@ -46,7 +46,7 @@ class Role(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Role \'%s\'>' % self.name
+        return f"<Role '{self.name}'>"
 
 
 class User(UserMixin, db.Model):
@@ -71,11 +71,11 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(default=True).first()
 
     def full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return f'{self.first_name} {self.last_name}'
 
     def can(self, permissions):
-        return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+        return (self.role is not None and
+                   (self.role.permissions & permissions) == permissions)
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER)
@@ -183,7 +183,7 @@ class User(UserMixin, db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return '<User \'%s\'>' % self.full_name()
+        return f"<User '{self.full_name()}'>"
 
 
 class AnonymousUser(AnonymousUserMixin):

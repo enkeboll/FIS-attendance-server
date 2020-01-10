@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
 from app import db
 from app.models import EditableHTML, IDCard, Student, PunchIn
@@ -25,10 +25,12 @@ def punch_in():
         serial_no = request.args['id']
         id_card = get_or_create(db.session, IDCard, serial_no=serial_no)
         print(id_card)
+        current_app.logger.info(f'ID card scanned: {id_card}')
         punch_in = PunchIn(idcard_id=id_card.id)
-        print(punch_in)
         db.session.add(punch_in)
         db.session.commit()
+        current_app.logger.info(f'Punch-in: {punch_in}')
+
         return f"Punch in recorded for card {serial_no}"
 
     else:

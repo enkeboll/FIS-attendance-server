@@ -11,7 +11,7 @@ class IDCard(db.Model):
     students = db.relationship('Student', backref='id_card', lazy='dynamic')
 
     def __repr__(self):
-        return '<IDCard {self.serial_no}>'
+        return f'<IDCard {self.serial_no}>'
 
 
 
@@ -25,6 +25,16 @@ class Student(db.Model):
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
+
+    def __init__(self, **kwargs):
+        super(Student, self).__init__(**kwargs)
+        # if self.cohort is None:
+        self.cohort = Cohort.query.filter_by(id=self.cohort_id)
+        # if self.idcard is None:
+        self.idcard = IDCard.query.filter_by(id=self.idcard_id)
+
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
     def __repr__(self):
         return f'<Student {self.first_name} {self.last_name}'

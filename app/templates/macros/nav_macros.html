@@ -14,21 +14,24 @@
 {% endmacro %}
 
 {# This is called for all users (including anonymous users). It renders the basic left side of the 
-   navigation bar. In the default case, the left hand side will read 'Flask-Base'. In the logged in
+   navigation bar. In the default case, the left hand side will read 'FIS-Attendance'. In the logged in
    admin case, there will also be an item that links to admin/ route. I have added an example use of
    render_menu_items.
 #}
 
 {% macro header_items(current_user) %}
     {% set endpoints = [
-      ('main.index', config.APP_NAME, 'home'),
-      ('main.about', 'About', 'info')
+      ('main.index', config.APP_NAME, 'home')
     ]%}
     {% set user = [] %}
     {% if current_user.is_authenticated %}
-      {% set user = ([(current_user.role.index + '.index', current_user.role.name + ' Dashboard', 'user')]) %}
+      {% set user = ([('instructor.index', 'Instructor Dashboard', 'info')]) %}
     {% endif %} 
-    {{ render_menu_items( endpoints +  user ) }}
+    {% set dashboard = [] %}
+    {% if current_user.is_admin() %}
+      {% set dashboard = ([('%s.index' % current_user.role.index, '%s Dashboard' % current_user.role.name, 'user')]) %}
+    {% endif %}
+    {{ render_menu_items( endpoints + user + dashboard ) }}
 {% endmacro %}
 
 {# This renders the right hand side of the navigation bar. If the user is logged in, it links to 

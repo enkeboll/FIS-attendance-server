@@ -20,7 +20,7 @@ if os.path.exists('config.env'):
 
 
 class Config:
-    APP_NAME = os.environ.get('APP_NAME', 'Flask-Base')
+    APP_NAME = os.environ.get('APP_NAME', 'FIS Attendance')
 
     if os.environ.get('SECRET_KEY'):
         SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -45,7 +45,7 @@ class Config:
     # Admin account
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'password')
     ADMIN_EMAIL = os.environ.get(
-        'ADMIN_EMAIL', 'flask-base-admin@example.com')
+        'ADMIN_EMAIL', 'andy.enkeboll@flatironschool.com')
     EMAIL_SUBJECT_PREFIX = '[{}]'.format(APP_NAME)
     EMAIL_SENDER = '{app_name} Admin <{email}>'.format(
         app_name=APP_NAME, email=MAIL_USERNAME)
