@@ -6,7 +6,7 @@ from wtforms.fields import (
     StringField,
     SubmitField,
 )
-from wtforms.fields.html5 import EmailField
+from wtforms.fields.html5 import DateField, EmailField
 from wtforms.validators import (
     Email,
     EqualTo,
@@ -15,7 +15,7 @@ from wtforms.validators import (
 )
 
 from app import db
-from app.models import Role, Student
+from app.models import Student
 
 
 class ChangeStudentEmailForm(FlaskForm):
@@ -29,11 +29,34 @@ class ChangeStudentEmailForm(FlaskForm):
         if Student.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
 
+class NewCohortForm(FlaskForm):
+    # TODO: coach selector
+    # role = QuerySelectField(
+    #     'Account type',
+    #     validators=[InputRequired()],
+    #     get_label='name',
+    #     query_factory=lambda: db.session.query(Role).order_by('permissions'))
 
-class ChangeAccountTypeForm(FlaskForm):
-    role = QuerySelectField(
-        'New account type',
-        validators=[InputRequired()],
-        get_label='name',
-        query_factory=lambda: db.session.query(Role).order_by('permissions'))
-    submit = SubmitField('Update role')
+    cohort_slug = StringField(
+        'Cohort slug', validators=[InputRequired(),
+                                   Length(1, 64)])
+    cohort_name = StringField(
+        'Cohort name', validators=[InputRequired(),
+                                   Length(1, 64)])
+
+    start_date = DateField(
+        'Start Date',
+        format='%Y-%m-%d',
+        validators=[InputRequired()])
+    
+    graduation_date = DateField(
+        'Graduation Date',
+        format='%Y-%m-%d',
+        validators=[InputRequired()])
+
+    submit = SubmitField('Create')
+
+    def validate_slug(self, field):
+        if Cohort.query.filter_by(slug=field.data).first():
+            raise ValidationError('Cohort slug already registered.')
+

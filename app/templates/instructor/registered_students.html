@@ -15,7 +15,7 @@
             </h2>
 
             <div class="ui menu">
-                <div id="select-role" class="ui dropdown item">
+                <div id="select-cohort" class="ui dropdown item">
                     <div class="text">
                         All cohorts
                     </div>
@@ -23,7 +23,7 @@
                     <div class="menu">
                         <div class="item" data-value="">All cohorts</div>
                         {% for c in cohorts %}
-                            <div class="item" data-value="{{ c.name }}">{{ c.name }}s</div>
+                            <div class="item" data-value="{{ c.name }}">{{ c.name }}</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -42,20 +42,20 @@
                     <thead>
                         <tr>
                             <th>First name</th>
-                            <th class="sorted ascending">Last name</th>
+                            <th>Last name</th>
                             <th>Email address</th>
                             <th>ID Card</th>
-                            <th>Cohort</th>
+                            <th class="sorted ascending">Cohort</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for s in students | sort(attribute='last_name') %}
+                    {% for s in students | sort(attribute='cohort_id') %}
                         <tr onclick="window.location.href = '{{ url_for('instructor.student_info', student_id=s.id) }}';">
                             <td>{{ s.first_name }}</td>
                             <td>{{ s.last_name }}</td>
                             <td>{{ s.email }}</td>
-                            <td>{{ s.idcard_id }}</td>
-                            <td class="user cohort">{{ s.cohort_id }}</td>
+                            <td>{{ s.idcard.serial_no }}</td>
+                            <td class="student cohort">{{ s.cohort.name }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -66,7 +66,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search-users').keyup(function () {
+            $('#search-students').keyup(function () {
                 var searchText = $(this).val();
                 if (searchText.length > 0) {
                     $('tbody td:icontains(' + searchText + ')').addClass('positive');
@@ -81,8 +81,8 @@
 
             $('#select-cohort').dropdown({
                 onChange: function (value, text, $selectedItem) {
-                    $('td.user.cohort:contains(' + value + ')').closest('tr').removeClass('hidden').show();
-                    $('td.user.cohort').not(':contains(' + value + ')').closest('tr').addClass('hidden').hide();
+                    $('td.student.cohort:contains(' + value + ')').closest('tr').removeClass('hidden').show();
+                    $('td.student.cohort').not(':contains(' + value + ')').closest('tr').addClass('hidden').hide();
                 }
             });
         });

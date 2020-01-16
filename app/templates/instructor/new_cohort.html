@@ -7,35 +7,37 @@
 {% block content %}
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
-            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+            <a class="ui basic compact button" href="{{ url_for('instructor.index') }}">
                 <i class="caret left icon"></i>
                 Back to dashboard
             </a>
             <h2 class="ui header">
-                Add New User
-                <div class="sub header">Create a new user account</div>
+                Add New Cohort
+                <div class="sub header">Create a new cohort</div>
             </h2>
 
             {% set flashes = {
                 'error':   get_flashed_messages(category_filter=['form-error']),
-                'warning': get_flashed_messages(category_filter=['form-check-email']),
+                'warning': get_flashed_messages(category_filter=['form-check-slug']),
                 'info':    get_flashed_messages(category_filter=['form-info']),
                 'success': get_flashed_messages(category_filter=['form-success'])
             } %}
 
             {{ f.begin_form(form, flashes) }}
 
-                {{ f.render_form_field(form.role) }}
-
                 <div class="two fields">
-                    {{ f.render_form_field(form.first_name) }}
-                    {{ f.render_form_field(form.last_name) }}
+                    {{ f.render_form_field(form.cohort_slug) }}
+                    {{ f.render_form_field(form.cohort_name) }}
                 </div>
 
-                {{ f.render_form_field(form.email) }}
+                <div class="two fields">
+                    {{ f.render_form_field(form.start_date) }}
+                    {{ f.render_form_field(form.graduation_date) }}
+                </div>
+                TODO: add default coaches/instructors
 
                 {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
-                {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+                {{ f.form_message(flashes['warning'], header='Warning', class='warning') }}
                 {{ f.form_message(flashes['info'], header='Information', class='info') }}
                 {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 

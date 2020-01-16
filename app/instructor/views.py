@@ -12,7 +12,10 @@ from flask_login import current_user, login_required
 from flask_rq import get_queue
 
 from app import db
-from app.instructor.forms import ChangeStudentEmailForm
+from app.instructor.forms import (
+    ChangeStudentEmailForm,
+    NewCohortForm
+)
 from app.models import Student, Cohort
 
 instructor = Blueprint('instructor', __name__)
@@ -43,6 +46,22 @@ def index():
 #               'form-success')
 #     return render_template('instructor/new_user.html', form=form)
 
+@instructor.route('/new-cohort', methods=['GET', 'POST'])
+@login_required
+def new_cohort():
+    """Create a new cohort."""
+    form = NewCohortForm()
+    if form.validate_on_submit():
+        cohort = Cohort(
+            name=form.cohort_name.data,
+            slug=form.cohort_slug.data,
+            start_date=form.start_date.data,
+            graduation_date=form.graduation_date.data)
+        db.session.add(cohort)
+        db.session.commit()
+        flash('Cohort {} successfully created'.format(cohort.name),
+              'form-success')
+    return render_template('instructor/new_cohort.html', form=form)
 
 @instructor.route('/students')
 @login_required
