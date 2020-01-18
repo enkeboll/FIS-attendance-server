@@ -60,3 +60,30 @@ class NewCohortForm(FlaskForm):
         if Cohort.query.filter_by(slug=field.data).first():
             raise ValidationError('Cohort slug already registered.')
 
+
+class NewStudentForm(FlaskForm):
+
+    first_name = StringField(
+        'First Name', validators=[InputRequired(),
+                                  Length(1, 64)])
+    last_name = StringField(
+        'Last Name', validators=[InputRequired(),
+                                 Length(1, 64)])
+
+    email = EmailField(
+        'Email Address', validators=[InputRequired(),
+                                     Length(1, 64),
+                                     Email()])
+    
+    idcard_id = StringField(
+        'ID Card ID', validators=[InputRequired()])
+
+    cohort_id = StringField(
+        'Cohort ID', validators=[InputRequired()])
+
+    submit = SubmitField('Create')
+
+    def validate_email(self, field):
+        if Student.query.filter_by(email=field.data).first():
+            raise ValidationError('Email already registered.')
+

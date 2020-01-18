@@ -14,7 +14,8 @@ from flask_rq import get_queue
 from app import db
 from app.instructor.forms import (
     ChangeStudentEmailForm,
-    NewCohortForm
+    NewCohortForm,
+    NewStudentForm
 )
 from app.models import Student, Cohort
 
@@ -24,27 +25,18 @@ instructor = Blueprint('instructor', __name__)
 @instructor.route('/')
 @login_required
 def index():
-    """Admin dashboard page."""
+    """Instructor dashboard page."""
     return render_template('instructor/index.html')
 
 
-# @instructor.route('/new-user', methods=['GET', 'POST'])
-# @login_required
-# def new_user():
-#     """Create a new user."""
-#     form = NewUserForm()
-#     if form.validate_on_submit():
-#         user = User(
-#             role=form.role.data,
-#             first_name=form.first_name.data,
-#             last_name=form.last_name.data,
-#             email=form.email.data,
-#             password=form.password.data)
-#         db.session.add(user)
-#         db.session.commit()
-#         flash('User {} successfully created'.format(user.full_name()),
-#               'form-success')
-#     return render_template('instructor/new_user.html', form=form)
+@instructor.route('/cohorts')
+@login_required
+def registered_cohorts():
+    """View all registered users."""
+    cohorts = Cohort.query.all()
+    return render_template(
+        'instructor/registered_cohorts.html', cohorts=cohorts)
+
 
 @instructor.route('/new-cohort', methods=['GET', 'POST'])
 @login_required
@@ -69,10 +61,48 @@ def registered_students():
     """View all registered users."""
     students = Student.query.all()
     cohorts = Cohort.query.all()
-    current_app.logger.info(students)
-    current_app.logger.info(cohorts)
+    # current_app.logger.info(students)
+    # current_app.logger.info(cohorts)
     return render_template(
         'instructor/registered_students.html', students=students, cohorts=cohorts)
+
+
+@instructor.route('/new-student', methods=['GET', 'POST'])
+@login_required
+def new_student():
+    """Create a new student."""
+    form = NewStudentForm()
+    if form.validate_on_submit():
+        student = Student(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            idcard_id=form.idcard_id.data,
+            cohort_id=form.cohort_id.data)
+        db.session.add(student)
+        db.session.commit()
+        flash('Student {} successfully created'.format(cohort.name),
+              'form-success')
+    return render_template('instructor/new_student.html', form=form)
+
+
+@instructor.route('/upload-students', methods=['GET', 'POST'])
+@login_required
+def upload_students():
+    """Upload a list of students."""
+    form = NewStudentForm()
+    if form.validate_on_submit():
+        student = Student(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            idcard_id=form.idcard_id.data,
+            cohort_id=form.cohort_id.data)
+        db.session.add(student)
+        db.session.commit()
+        flash('Student {} successfully created'.format(cohort.name),
+              'form-success')
+    return render_template('instructor/upload_students.html', form=form)
 
 
 @instructor.route('/student/<int:student_id>')
@@ -103,29 +133,6 @@ def change_student_email(student_id):
     return render_template('instructor/manage_student.html', student=student, form=form)
 
 
-# @instructor.route(
-#     '/user/<int:user_id>/change-account-type', methods=['GET', 'POST'])
-# @login_required
-# def change_account_type(user_id):
-#     """Change a user's account type."""
-#     if current_user.id == user_id:
-#         flash('You cannot change the type of your own account. Please ask '
-#               'another administrator to do this.', 'error')
-#         return redirect(url_for('admin.user_info', user_id=user_id))
-
-#     user = User.query.get(user_id)
-#     if user is None:
-#         abort(404)
-#     form = ChangeAccountTypeForm()
-#     if form.validate_on_submit():
-#         user.role = form.role.data
-#         db.session.add(user)
-#         db.session.commit()
-#         flash('Role for user {} successfully changed to {}.'.format(
-#             user.full_name(), user.role.name), 'form-success')
-#     return render_template('instructor/manage_user.html', user=user, form=form)
-
-
 @instructor.route('/student/<int:student_id>/delete')
 @login_required
 def delete_student_request(student_id):
@@ -144,4 +151,4 @@ def delete_student(student_id):
     db.session.delete(student)
     db.session.commit()
     flash('Successfully deleted student %s.' % student.full_name(), 'success')
-    return redirect(url_for('admin.registered_students'))
+    return redirect(url_for('instructor.registered_students'))
