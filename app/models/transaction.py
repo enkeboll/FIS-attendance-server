@@ -8,7 +8,7 @@ class IDCard(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
-    students = db.relationship('Student', backref='id_card', lazy='dynamic')
+    students = db.relationship('Student', backref='idcard', lazy=True)
 
     @staticmethod
     def generate_fake(count=100, **kwargs):
@@ -46,24 +46,12 @@ class Student(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
+    # Backrefs
+    # cohort
+    # idcard
+
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
-
-    @property
-    def idcard(self):
-        try:
-            return self._idcard
-        except AttributeError:
-            self._idcard = IDCard.query.filter_by(id=self.idcard_id).first()
-            return self._idcard
-
-    @property
-    def cohort(self):
-        try:
-            return self._cohort
-        except AttributeError:
-            self._cohort = Cohort.query.filter_by(id=self.cohort_id).first()
-            return self._cohort
 
     @staticmethod
     def generate_fake(count=100, **kwargs):
@@ -112,6 +100,7 @@ class Cohort(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
+    students = db.relationship('Student', backref='cohort', lazy=True)
 
     @staticmethod
     def generate_fake(count=100, **kwargs):

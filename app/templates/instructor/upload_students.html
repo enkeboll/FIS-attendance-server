@@ -25,6 +25,9 @@
 
             {{ f.begin_form(form, flashes) }}
 
+
+                {{ f.render_form_field(form.cohort) }}
+
                 {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
                 {{ f.form_message(flashes['warning'], header='Warning', class='warning') }}
                 {{ f.form_message(flashes['info'], header='Information', class='info') }}
@@ -35,6 +38,12 @@
                 {% endfor %}
 
             {{ f.end_form() }}
+
+            {% for row in data %}
+                {{ row }}
+            {% endfor %}
+                
+
         </div>
     </div>
 {% endblock %}

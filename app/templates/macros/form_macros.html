@@ -139,6 +139,9 @@
         {{ render_form(field) }}
     {% elif field.type == 'CustomSelectField' %}
         {{ render_custom_select(field) }}
+    {% elif field.type == 'FileField' %}
+        {{ field.label }}
+        {{ field }}
     {% else %}
         {{ field.label }}
         {% if field.description %}

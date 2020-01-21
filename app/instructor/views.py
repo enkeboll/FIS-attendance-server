@@ -1,21 +1,24 @@
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     redirect,
     render_template,
     request,
-    url_for,
-    current_app
+    session,
+    url_for
 )
 from flask_login import current_user, login_required
 from flask_rq import get_queue
+from werkzeug.utils import secure_filename
 
 from app import db
 from app.instructor.forms import (
     ChangeStudentEmailForm,
     NewCohortForm,
-    NewStudentForm
+    NewStudentForm,
+    StudentUploadForm
 )
 from app.models import Student, Cohort
 
@@ -70,39 +73,32 @@ def registered_students():
 @instructor.route('/new-student', methods=['GET', 'POST'])
 @login_required
 def new_student():
-    """Create a new student."""
+    """Upload a list of students."""
     form = NewStudentForm()
     if form.validate_on_submit():
+        if form.roster.data:
+            session['rostercsv'] = form.roster.data.read().decode('utf-8').split('\n')
+            return redirect(url_for('.show_uploaded_students'))
         student = Student(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             email=form.email.data,
-            idcard_id=form.idcard_id.data,
-            cohort_id=form.cohort_id.data)
+            cohort=form.cohort.data)
         db.session.add(student)
         db.session.commit()
-        flash('Student {} successfully created'.format(cohort.name),
+        flash('Student {} {} successfully created'.format(form.first_name,
+                                                          form.last_name),
               'form-success')
     return render_template('instructor/new_student.html', form=form)
 
 
 @instructor.route('/upload-students', methods=['GET', 'POST'])
 @login_required
-def upload_students():
+def show_uploaded_students():
     """Upload a list of students."""
-    form = NewStudentForm()
-    if form.validate_on_submit():
-        student = Student(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            idcard_id=form.idcard_id.data,
-            cohort_id=form.cohort_id.data)
-        db.session.add(student)
-        db.session.commit()
-        flash('Student {} successfully created'.format(cohort.name),
-              'form-success')
-    return render_template('instructor/upload_students.html', form=form)
+    roster = session.get('rostercsv', [])
+    form = StudentUploadForm()
+    return render_template('instructor/upload_students.html', form=form, data=roster)
 
 
 @instructor.route('/student/<int:student_id>')

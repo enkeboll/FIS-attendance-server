@@ -1,8 +1,12 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
+
+from werkzeug import secure_filename
+
 from wtforms import ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.fields import (
-    PasswordField,
+    SelectField,
     StringField,
     SubmitField,
 )
@@ -15,7 +19,8 @@ from wtforms.validators import (
 )
 
 from app import db
-from app.models import Student
+from app.models import Student, Cohort
+from app.utils import RequiredIfNot
 
 
 class ChangeStudentEmailForm(FlaskForm):
@@ -58,32 +63,48 @@ class NewCohortForm(FlaskForm):
 
     def validate_slug(self, field):
         if Cohort.query.filter_by(slug=field.data).first():
-            raise ValidationError('Cohort slug already registered.')
+            raise ValidationError('Cohort already created.')
 
 
 class NewStudentForm(FlaskForm):
 
+    roster = FileField(
+        'Upload Roster for Single Cohort',
+        validators=[FileAllowed(['csv'])])
+
     first_name = StringField(
-        'First Name', validators=[InputRequired(),
+        'First Name', validators=[RequiredIfNot('roster'),
                                   Length(1, 64)])
     last_name = StringField(
-        'Last Name', validators=[InputRequired(),
+        'Last Name', validators=[RequiredIfNot('roster'),
                                  Length(1, 64)])
 
     email = EmailField(
-        'Email Address', validators=[InputRequired(),
+        'Email Address', validators=[RequiredIfNot('roster'),
                                      Length(1, 64),
                                      Email()])
-    
-    idcard_id = StringField(
-        'ID Card ID', validators=[InputRequired()])
 
-    cohort_id = StringField(
-        'Cohort ID', validators=[InputRequired()])
+    cohort = QuerySelectField(
+        'Cohort Name (optional)',
+        validators=[],
+        get_label='name',
+        query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()),
+        allow_blank=True, blank_text='No Cohort')
 
     submit = SubmitField('Create')
 
     def validate_email(self, field):
         if Student.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
+
+
+class StudentUploadForm(FlaskForm):
+
+    cohort = QuerySelectField(
+        'Cohort Name',
+        validators=[InputRequired],
+        get_label='name',
+        query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()))
+
+    submit = SubmitField('Create')
 

@@ -15,12 +15,8 @@
                 Add New Student
                 <div class="sub header">Create new student</div>
             </h2>
-
-            <button class="ui right labeled icon button">
-                <i class="upload icon"></i>
-                <a href="{{ url_for('instructor.upload_students') }}">Upload list of new students</a>
-            </button>
-            <p></p>
+            <p />
+            
             {% set flashes = {
                 'error':   get_flashed_messages(category_filter=['form-error']),
                 'warning': get_flashed_messages(category_filter=['form-check-slug']),
@@ -30,16 +26,25 @@
 
             {{ f.begin_form(form, flashes) }}
 
+<!--                 <div>
+                    <input type="file" class="inputfile" id="embedpollfileinput" onchange="form.submit()"/>
+                    <label for="embedpollfileinput" class="ui right labeled icon button">
+                        <i class="upload icon"></i>
+                        Upload list of new students
+                    </label>
+                </div>
+                <p />
+ -->
+                {{ f.render_form_field(form.roster) }}
+                
                 <div class="two fields">
                     {{ f.render_form_field(form.first_name) }}
                     {{ f.render_form_field(form.last_name) }}
                 </div>
-
-                {{ f.render_form_field(form.email) }}
                 
                 <div class="two fields">
-                    {{ f.render_form_field(form.idcard_id) }}
-                    {{ f.render_form_field(form.cohort_id) }}
+                    {{ f.render_form_field(form.email) }}
+                    {{ f.render_form_field(form.cohort) }}
                 </div>
 
                 {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
