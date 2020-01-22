@@ -1,5 +1,9 @@
+import csv
+from io import StringIO
+
 from flask import (
     Blueprint,
+    Markup,
     abort,
     current_app,
     flash,
@@ -63,9 +67,9 @@ def new_cohort():
 def registered_students():
     """View all registered users."""
     students = Student.query.all()
+    students.sort(key=lambda s: (s.cohort and s.cohort.name) or ' ',
+                  reverse=True)
     cohorts = Cohort.query.all()
-    # current_app.logger.info(students)
-    # current_app.logger.info(cohorts)
     return render_template(
         'instructor/registered_students.html', students=students, cohorts=cohorts)
 
@@ -77,18 +81,27 @@ def new_student():
     form = NewStudentForm()
     if form.validate_on_submit():
         if form.roster.data:
-            session['rostercsv'] = form.roster.data.read().decode('utf-8').split('\n')
-            return redirect(url_for('.show_uploaded_students'))
-        student = Student(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            cohort=form.cohort.data)
-        db.session.add(student)
-        db.session.commit()
-        flash('Student {} {} successfully created'.format(form.first_name,
-                                                          form.last_name),
-              'form-success')
+            roster_data = form.roster.data.read().decode('utf-8')
+            first_line = roster_data.split('\n')[0]
+            required_keys = ['first_name',
+                             'last_name',
+                             'email']
+            if all(x in first_line for x in required_keys):
+                session['rostercsv'] = roster_data
+                return redirect(url_for('.show_uploaded_students'))
+            msg = Markup('Missing fields in form. CSV header requires "first_name", "last_name", and "email"'
+                         '<br>Fields received: <ul><li>{}</li></ul>'.format('</li><br><li>'.join(first_line.split(','))))
+            flash(msg, 'form-error')
+        elif form.first_name.data:
+            student = Student(
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
+                email=form.email.data,
+                cohort=form.cohort.data)
+            db.session.add(student)
+            db.session.commit()
+            msg = Markup(f'Student <b>{form.first_name.data} {form.last_name.data}</b> successfully created')
+            flash(msg, 'form-success')
     return render_template('instructor/new_student.html', form=form)
 
 
@@ -96,9 +109,28 @@ def new_student():
 @login_required
 def show_uploaded_students():
     """Upload a list of students."""
-    roster = session.get('rostercsv', [])
     form = StudentUploadForm()
-    return render_template('instructor/upload_students.html', form=form, data=roster)
+    roster = session.get('rostercsv', '')
+    reader = csv.DictReader(StringIO(roster))
+    students = []
+    for row in reader:
+        student = Student(
+            first_name=row['first_name'],
+            last_name=row['last_name'],
+            email=row['email'])
+        student.valid = bool(Student.query.filter_by(email=row['email']).first())
+        students.append(student)
+
+    if form.validate_on_submit():
+        # TODO: remove unselected students
+        for s in students:
+            s.cohort = form.cohort.data
+        db.session.bulk_save_objects(students)
+        db.session.commit()
+        flash('{} students successfully created'.format(len(students)),
+              'form-success')
+        # return redirect(url_for('.registered_students'))
+    return render_template('instructor/upload_students.html', form=form, students=students)
 
 
 @instructor.route('/student/<int:student_id>')
@@ -147,4 +179,4 @@ def delete_student(student_id):
     db.session.delete(student)
     db.session.commit()
     flash('Successfully deleted student %s.' % student.full_name(), 'success')
-    return redirect(url_for('instructor.registered_students'))
+    return redirect(url_for('.registered_students'))

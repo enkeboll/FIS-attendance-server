@@ -69,7 +69,8 @@ class NewCohortForm(FlaskForm):
 class NewStudentForm(FlaskForm):
 
     roster = FileField(
-        'Upload Roster for Single Cohort',
+        "Upload Roster for Single Cohort. Format expected is the output from "
+        "<a href='https://learn.co/batches'>https://learn.co/batches</a>",
         validators=[FileAllowed(['csv'])])
 
     first_name = StringField(
@@ -91,7 +92,7 @@ class NewStudentForm(FlaskForm):
         query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()),
         allow_blank=True, blank_text='No Cohort')
 
-    submit = SubmitField('Create')
+    submit_button = SubmitField('Create')
 
     def validate_email(self, field):
         if Student.query.filter_by(email=field.data).first():
@@ -102,7 +103,7 @@ class StudentUploadForm(FlaskForm):
 
     cohort = QuerySelectField(
         'Cohort Name',
-        validators=[InputRequired],
+        validators=[InputRequired()],
         get_label='name',
         query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()))
 

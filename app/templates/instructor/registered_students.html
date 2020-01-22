@@ -45,11 +45,11 @@
                             <th>Last name</th>
                             <th>Email address</th>
                             <th>ID Card</th>
-                            <th class="sorted ascending">Cohort</th>
+                            <th>Cohort</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for s in students | sort(attribute='cohort_id') %}
+                    {% for s in students %}
                         <tr onclick="window.location.href = '{{ url_for('instructor.student_info', student_id=s.id) }}';">
                             <td>{{ s.first_name }}</td>
                             <td>{{ s.last_name }}</td>

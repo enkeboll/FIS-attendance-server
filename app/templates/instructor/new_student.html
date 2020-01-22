@@ -36,7 +36,7 @@
                 <p />
  -->
                 {{ f.render_form_field(form.roster) }}
-                
+
                 <div class="two fields">
                     {{ f.render_form_field(form.first_name) }}
                     {{ f.render_form_field(form.last_name) }}
@@ -59,4 +59,17 @@
             {{ f.end_form() }}
         </div>
     </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // $("table tbody").on("click", "tr", function() {
+            //     var row = $(this);
+            //     row.toggleClass("selected_row");
+            //     // row.siblings("selected_row").removeClass("selected_row");
+            // });
+            document.getElementById("roster").onchange = function() {
+                document.querySelector("form").submit();
+            };
+        });
+    </script>
+
 {% endblock %}
