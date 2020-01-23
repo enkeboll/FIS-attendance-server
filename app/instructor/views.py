@@ -19,6 +19,7 @@ from werkzeug.utils import secure_filename
 
 from app import db
 from app.instructor.forms import (
+    ChangeStudentCohortForm,
     ChangeStudentEmailForm,
     NewCohortForm,
     NewStudentForm,
@@ -158,6 +159,24 @@ def change_student_email(student_id):
         db.session.commit()
         flash('Email for student {} successfully changed to {}.'.format(
             student.full_name(), student.email), 'form-success')
+    return render_template('instructor/manage_student.html', student=student, form=form)
+
+
+@instructor.route('/student/<int:student_id>/change-cohort', methods=['GET', 'POST'])
+@login_required
+def change_student_cohort(student_id):
+    """Change a student's email."""
+    student = Student.query.filter_by(id=student_id).first()
+    if student is None:
+        abort(404)
+    form = ChangeStudentCohortForm()
+    if form.validate_on_submit():
+        student.cohort = form.cohort.data
+        db.session.add(student)
+        db.session.commit()
+        flash('{} successfully moved to cohort {}.'.format(
+            student.full_name(), student.cohort.name), 'success')
+        return redirect(url_for('.student_info', student_id=student_id))
     return render_template('instructor/manage_student.html', student=student, form=form)
 
 

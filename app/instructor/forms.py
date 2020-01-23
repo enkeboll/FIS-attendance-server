@@ -34,6 +34,17 @@ class ChangeStudentEmailForm(FlaskForm):
         if Student.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
 
+
+class ChangeStudentCohortForm(FlaskForm):
+    cohort = QuerySelectField(
+        'Cohort Name',
+        validators=[],
+        get_label='name',
+        query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()))
+
+    submit = SubmitField('Update Cohort')
+
+
 class NewCohortForm(FlaskForm):
     # TODO: coach selector
     # role = QuerySelectField(
