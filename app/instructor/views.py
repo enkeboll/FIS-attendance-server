@@ -25,7 +25,7 @@ from app.instructor.forms import (
     NewStudentForm,
     StudentUploadForm
 )
-from app.models import Student, Cohort
+from app.models import Student, Cohort, IDCard
 
 instructor = Blueprint('instructor', __name__)
 
@@ -62,6 +62,15 @@ def new_cohort():
         flash('Cohort {} successfully created'.format(cohort.name),
               'form-success')
     return render_template('instructor/new_cohort.html', form=form)
+
+@instructor.route('/new-idcards')
+@login_required
+def register_idcards():
+    """View all unregistered ID cards."""
+    idcards = IDCard.query.all()
+    return render_template(
+        'instructor/stranded_idcards.html', idcards=idcards)
+
 
 @instructor.route('/students')
 @login_required

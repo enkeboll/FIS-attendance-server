@@ -97,6 +97,7 @@ class PunchIn(db.Model):
             mean_time = datetime.datetime.combine(pi_date, datetime.time(9, 15))
 
             for id_card in id_cards:
+                # fake absences
                 if random.random() < 0.05:
                     continue
                 pi = PunchIn(
