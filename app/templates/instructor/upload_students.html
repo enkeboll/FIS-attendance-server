@@ -82,6 +82,13 @@
 
                 $('#students').val(arr.join('|'));
             });
+
+            $("table tbody").on("click", "tr", function() {
+                var inp = this.getElementsByTagName('input')[0];
+                if (inp.disabled == false) {
+                    inp.checked = !inp.checked
+                };
+            });
         });
     </script>
 
