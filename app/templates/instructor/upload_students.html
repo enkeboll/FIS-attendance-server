@@ -86,11 +86,15 @@
                 $('#students').val(arr.join('|'));
             });
 
-            $("table tbody").on("click", "tr", function() {
-                var inp = this.getElementsByTagName('input')[0];
-                if (inp.disabled == false) {
-                    inp.checked = !inp.checked
-                };
+            $("table tbody").on("click", "tr", function(e) {
+                if ($(e.target).is("label,input")) {
+                    return
+                } else {
+                    var inp = this.getElementsByTagName('input')[0];
+                    if (inp.disabled == false) {
+                        inp.checked = !inp.checked
+                    };
+                }
             });
         });
     </script>
