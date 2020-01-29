@@ -8,7 +8,7 @@ from redis import Redis
 from rq import Connection, Queue, Worker
 
 from app import create_app, db
-from app.models import Role, User, Cohort, Student, IDCard
+from app.models import Role, User, Cohort, Student, IDCard, PunchIn
 from config import Config
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -55,10 +55,12 @@ def add_fake_data(number_users):
     """
     Adds fake data to the database.
     """
-    User.generate_fake(count=number_users)
-    Cohort.generate_fake(count=2)
-    Student.generate_fake(count=10)
-    IDCard.generate_fake(count=10)
+    # User.generate_fake(count=number_users)
+
+    # Cohort.generate_fake(count=4)
+    # IDCard.generate_fake(count=40)
+    # Student.generate_fake(count=40)
+    PunchIn.generate_fake(days=10)
     
 
 

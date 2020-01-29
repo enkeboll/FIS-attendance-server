@@ -14,16 +14,9 @@ class IDCard(db.Model):
     def generate_fake(count=100, **kwargs):
         """Generate a number of fake users for testing."""
         from sqlalchemy.exc import IntegrityError
-        from random import seed, randint
-        from faker import Faker
 
-        fake = Faker()
-
-        seed()
-        for i in range(count):
-            idc = IDCard(
-                serial_no=randint(1000, 9999),
-                **kwargs)
+        for i in range(1000, 1000 + count):
+            idc = IDCard(serial_no=i, **kwargs)
             db.session.add(idc)
             try:
                 db.session.commit()
@@ -87,6 +80,36 @@ class PunchIn(db.Model):
     idcard_id = db.Column(db.Integer, db.ForeignKey('id_card.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now(), index=True)
 
+
+    @staticmethod
+    def generate_fake(days=10, **kwargs):
+        """Generate n days of punch-in data for testing."""
+        from sqlalchemy.exc import IntegrityError
+        import random
+        import datetime
+
+        id_cards = IDCard.query.all()
+        # start on monday two weeks ago
+        start_date = datetime.date.today() - datetime.timedelta(days=14 + datetime.date.today().weekday())
+        for pi_date in (start_date + datetime.timedelta(n) for n in range(days + 2*(days // 5))):
+            if pi_date.weekday() in (5, 6):
+                continue
+            mean_time = datetime.datetime.combine(pi_date, datetime.time(9, 15))
+
+            for id_card in id_cards:
+                if random.random() < 0.05:
+                    continue
+                pi = PunchIn(
+                    idcard_id=id_card.id,
+                    created_at=mean_time + datetime.timedelta(minutes=round(random.normalvariate(0, 15), 1)),
+                    **kwargs)
+                db.session.add(pi)
+                try:
+                    db.session.commit()
+                except IntegrityError:
+                    db.session.rollback()
+
+
     def __repr__(self):
         return f'<PunchIn {self.idcard_id} @ {self.created_at}>'
 
@@ -104,16 +127,13 @@ class Cohort(db.Model):
 
     @staticmethod
     def generate_fake(count=100, **kwargs):
-        """Generate a number of fake users for testing."""
+        """Generate a number of fake cohorts for testing."""
         from sqlalchemy.exc import IntegrityError
-        from random import seed, randint, choice
-        from faker import Faker
+        from random import randint, choice
         from datetime import date, timedelta
 
-        fake = Faker()
         disciplines = ('DS', 'SE', 'CS', 'UX')
 
-        seed()
         for i in range(count):
             start_date = date.today() - timedelta(randint(0, 90))
             disc = choice(disciplines)

@@ -24,13 +24,16 @@
 
             {{ f.begin_form(form, flashes) }}
 
+            {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+            {{ f.form_message(flashes['warning'], header='Warning', class='warning') }}
+            {{ f.form_message(flashes['info'], header='Information', class='info') }}
+            {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 
-                {{ f.render_form_field(form.cohort) }}
-
-                {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
-                {{ f.form_message(flashes['warning'], header='Warning', class='warning') }}
-                {{ f.form_message(flashes['info'], header='Information', class='info') }}
-                {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+            {{ f.render_form_field(form.cohort) }}
+            <div class="sub header">
+                New cohort? <a href="{{ url_for('instructor.new_cohort') }}">Add the cohort</a> first.
+            </div>
+            <p />
 
             {# Use overflow-x: scroll so that mobile views don't freak out
              # when the table is too wide #}
