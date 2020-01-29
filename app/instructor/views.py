@@ -90,6 +90,7 @@ def new_student():
             if all(x in first_line for x in required_keys):
                 session['rostercsv'] = roster_data
                 return redirect(url_for('.show_uploaded_students'))
+
             msg = Markup('Missing fields in form. CSV header requires "first_name", "last_name", and "email"'
                          '<br>Fields received: <ul><li>{}</li></ul>'.format('</li><br><li>'.join(first_line.split(','))))
             flash(msg, 'form-error')
@@ -102,35 +103,43 @@ def new_student():
             db.session.add(student)
             db.session.commit()
             msg = Markup(f'Student <b>{form.first_name.data} {form.last_name.data}</b> successfully created')
-            flash(msg, 'form-success')
+            flash(msg, 'success')
+            return redirect(url_for('.registered_students'))
     return render_template('instructor/new_student.html', form=form)
 
 
 @instructor.route('/upload-students', methods=['GET', 'POST'])
 @login_required
 def show_uploaded_students():
-    """Upload a list of students."""
+    """Show & select uploaded students."""
+
     form = StudentUploadForm()
     roster = session.get('rostercsv', '')
     reader = csv.DictReader(StringIO(roster))
+
     students = []
-    for row in reader:
+    for ix, row in enumerate(reader):
         student = Student(
             first_name=row['first_name'],
             last_name=row['last_name'],
             email=row['email'])
-        student.valid = bool(Student.query.filter_by(email=row['email']).first())
+        # invalidate students whose emails are already registered
+        student.invalid = bool(Student.query.filter_by(email=row['email']).first())
+        # for selecting which students to include - probably a better way of doing this
+        student.index = ix
         students.append(student)
 
     if form.validate_on_submit():
-        # TODO: remove unselected students
-        for s in students:
+        # student indices come in pipe delimited
+        student_ix_to_add = [int(x) for x in form.students.data.split('|') if x]
+
+        for s in [students[i] for i in student_ix_to_add]:
             s.cohort = form.cohort.data
-        db.session.bulk_save_objects(students)
+            db.session.add(s)
         db.session.commit()
-        flash('{} students successfully created'.format(len(students)),
-              'form-success')
-        # return redirect(url_for('.registered_students'))
+        flash('{} students successfully created'.format(len(student_ix_to_add)),
+              'success')
+        return redirect(url_for('.registered_students'))
     return render_template('instructor/upload_students.html', form=form, students=students)
 
 

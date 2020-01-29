@@ -6,7 +6,7 @@ from werkzeug import secure_filename
 from wtforms import ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.fields import (
-    SelectField,
+    HiddenField,
     StringField,
     SubmitField,
 )
@@ -15,7 +15,7 @@ from wtforms.validators import (
     Email,
     EqualTo,
     InputRequired,
-    Length,
+    Length
 )
 
 from app import db
@@ -47,11 +47,6 @@ class ChangeStudentCohortForm(FlaskForm):
 
 class NewCohortForm(FlaskForm):
     # TODO: coach selector
-    # role = QuerySelectField(
-    #     'Account type',
-    #     validators=[InputRequired()],
-    #     get_label='name',
-    #     query_factory=lambda: db.session.query(Role).order_by('permissions'))
 
     cohort_slug = StringField(
         'Cohort slug', validators=[InputRequired(),
@@ -117,6 +112,8 @@ class StudentUploadForm(FlaskForm):
         validators=[InputRequired()],
         get_label='name',
         query_factory=lambda: db.session.query(Cohort).order_by(Cohort.start_date.desc()))
+
+    students = HiddenField()
 
     submit = SubmitField('Create')
 

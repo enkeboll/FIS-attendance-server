@@ -32,25 +32,28 @@
                 {{ f.form_message(flashes['info'], header='Information', class='info') }}
                 {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 
-            {% for row in data %}
-                {{ row }}
-            {% endfor %}
-                
-
             {# Use overflow-x: scroll so that mobile views don't freak out
              # when the table is too wide #}
             <div style="overflow-x: scroll;">
-                <table class="ui sortable unstackable selectable celled table">
+                <table class="ui sortable unstackable selectable celled table definition">
                     <thead>
                         <tr>
-                            <th class="sorted ascending">First name</th>
+                            <th></th>
+                            <th>First name</th>
                             <th>Last name</th>
                             <th>Email address</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for s in students | sort(attribute='first_name') %}
+                    {% for s in students %}
                         <tr class="{{'negative' if s.invalid }}">
+                            <td class="collapsing">
+                                <div class="ui fitted toggle checkbox{{ ' checked' if not s.invalid }}">
+                                    <input name="student_include" value="{{ s.index }}"
+                                           type="checkbox"{{ ' disabled' if s.invalid else ' checked' }}>
+                                    <label></label>
+                                </div>
+                            </td>
                             <td>{{ s.first_name }}</td>
                             <td>{{ s.last_name }}</td>
                             <td>{{ s.email }}</td>
@@ -71,11 +74,15 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $("table tbody").on("click", "tr", function() {
-                var row = $(this);
-                row.toggleClass("selected_row");
-                // row.siblings("selected_row").removeClass("selected_row");
+            $('form').submit(function() {
+                var arr=[];
+                $('input:checked[name=student_include]').each(function () {
+                    arr.push($(this).val());
+                });
+
+                $('#students').val(arr.join('|'));
             });
         });
     </script>
+
 {% endblock %}

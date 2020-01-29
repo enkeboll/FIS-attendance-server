@@ -29,19 +29,19 @@
                 <table class="ui searchable sortable unstackable celled table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Slug</th>
                             <th class="sorted ascending">Start Date</th>
+                            <th>End Date</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for c in cohorts | sort(attribute='start_date') %}
                         <tr>
-                            <td>{{ c.id }}</td>
                             <td class="cohort">{{ c.name }}</td>
                             <td>{{ c.slug }}</td>
                             <td>{{ c.start_date }}</td>
+                            <td>{{ c.graduation_date }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

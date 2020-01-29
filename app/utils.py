@@ -1,4 +1,5 @@
 from flask import url_for
+
 from wtforms.compat import text_type
 from wtforms.fields import Field
 from wtforms.validators import InputRequired, Optional
